@@ -1,13 +1,13 @@
 var Service;
 var Characteristic;
 
-var ssh = require('@garytee/ssh-exec'),
-    assign = require('object-assign');
+var ssh = require("remote-ssh-exec"),
+  assign = require("object-assign")
 
 module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
-  homebridge.registerAccessory('@garytee/homebridge-ssh', 'SSH', SshAccessory);
+  homebridge.registerAccessory('homebridge-remote-ssh', 'SSH', SshAccessory);
 }
 
 function SshAccessory(log, config) {
