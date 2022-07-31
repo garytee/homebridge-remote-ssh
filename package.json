@@ -1,0 +1,24 @@
+{
+  "name": "@garytee/homebridge-ssh",
+  "version": "0.0.8",
+  "description": "SSH plugin for homebridge: https://github.com/nfarina/homebridge",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "author": {
+    "name": "Gary Tietjen"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/garytee/homebridge-ssh.git"
+  },
+  "dependencies": {
+    "object-assign": "^4.1.1",
+    "@garytee/ssh-exec": "^2.0.1"
+  }
+}
