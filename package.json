@@ -1,5 +1,5 @@
 {
-  "name": "@garytee/homebridge-ssh",
+  "name": "homebridge-remote-ssh",
   "version": "0.0.8",
   "description": "SSH plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
@@ -15,10 +15,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/garytee/homebridge-ssh.git"
+    "url": "git://github.com/garytee/homebridge-remote-ssh.git"
   },
   "dependencies": {
     "object-assign": "^4.1.1",
-    "@garytee/ssh-exec": "^2.0.1"
+    "remote-ssh-exec": "^1.0.0"
   }
 }
