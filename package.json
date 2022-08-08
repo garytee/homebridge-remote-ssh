@@ -36,9 +36,9 @@
     "ts-node": "^10.9.1"
   },
   "devDependencies": {
-    "@types/node": "10.17.19",
-    "homebridge": "^1.0.4",
+    "@types/node": "18.6.5",
+    "homebridge": "^1.5.0",
     "rimraf": "^3.0.2",
-    "typescript": "^3.8.3"
+    "typescript": "^4.7.4"
   }
 }

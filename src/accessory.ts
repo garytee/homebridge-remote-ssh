@@ -2,7 +2,7 @@ import {
   AccessoryConfig,
   AccessoryPlugin,
   API,
-  // CharacteristicEventTypes,
+  CharacteristicEventTypes,
   CharacteristicGetCallback,
   CharacteristicSetCallback,
   CharacteristicValue,
@@ -35,19 +35,18 @@ import assign from "object-assign"
  * of the api object, which can be acquired for example in the initializer function. This reference can be stored
  * like this for example and used to access all exported variables and classes from HAP-NodeJS.
  */
-
 let hap: HAP
 
 /*
  * Initializer function called when the plugin is loaded.
  */
 export = (api: API) => {
-  let Service = api.hap.Service
-  let Characteristic = api.hap.Characteristic
   hap = api.hap
   api.registerAccessory("SSH", SshAccessory)
 }
+
 class SshAccessory implements AccessoryPlugin {
+  private powerOn = false
   private readonly log: Logging
   private readonly name: string
   private readonly service: string
@@ -146,9 +145,9 @@ class SshAccessory implements AccessoryPlugin {
       .setCharacteristic(hap.Characteristic.SerialNumber, "SSH Serial Number")
     var characteristic = this.switchService
       .getCharacteristic(hap.Characteristic.On)
-      .on("set", this.setState.bind(this))
+      .on(CharacteristicEventTypes.SET, this.setState.bind(this))
     if (this.stateCommand) {
-      characteristic.on("get", this.getState.bind(this))
+      characteristic.on(CharacteristicEventTypes.GET, this.getState.bind(this))
     }
     return [this.informationService, this.switchService]
   }
