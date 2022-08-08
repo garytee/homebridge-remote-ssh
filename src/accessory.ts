@@ -2,7 +2,7 @@ import {
   AccessoryConfig,
   AccessoryPlugin,
   API,
-  CharacteristicEventTypes,
+  // CharacteristicEventTypes,
   CharacteristicGetCallback,
   CharacteristicSetCallback,
   CharacteristicValue,
@@ -10,7 +10,6 @@ import {
   Logging,
   Service,
 } from "homebridge"
-
 import ssh from "remote-ssh-exec"
 import assign from "object-assign"
 
@@ -36,23 +35,18 @@ import assign from "object-assign"
  * of the api object, which can be acquired for example in the initializer function. This reference can be stored
  * like this for example and used to access all exported variables and classes from HAP-NodeJS.
  */
+
 let hap: HAP
 
 /*
  * Initializer function called when the plugin is loaded.
  */
-// export = (api: API) => {
-//   hap = api.hap;
-//   api.registerAccessory("ExampleSwitch", ExampleSwitch);
-// };
-
 export = (api: API) => {
   let Service = api.hap.Service
   let Characteristic = api.hap.Characteristic
   hap = api.hap
   api.registerAccessory("SSH", SshAccessory)
 }
-
 class SshAccessory implements AccessoryPlugin {
   private readonly log: Logging
   private readonly name: string
@@ -63,6 +57,8 @@ class SshAccessory implements AccessoryPlugin {
   private readonly onValue: string
   private readonly exactMatch: string
   private readonly ssh: string
+  private readonly switchService: Service
+  private readonly informationService: Service
 
   private matchesString(match: string): boolean {
     if (this.exactMatch) {
@@ -80,47 +76,37 @@ class SshAccessory implements AccessoryPlugin {
     var state = powerOn ? "on" : "off"
     var prop = state + "Command"
     var command = accessory[prop]
-
     var stream = ssh(command, accessory.ssh)
-
     stream.on("error", function (err: any) {
       accessory.log("Error: " + err)
       callback(
         err || new Error("Error setting " + accessory.name + " to " + state)
       )
     })
-
     stream.on("finish", function () {
       accessory.log("Set " + accessory.name + " to " + state)
-      callback(null)
+      callback(undefined)
     })
   }
 
   private getState = (callback: CharacteristicGetCallback) => {
     var accessory = this
     var command = accessory["stateCommand"]
-
     var stream = ssh(command, accessory.ssh)
-
     stream.on("error", function (err: any) {
       accessory.log("Error: " + err)
       callback(err || new Error("Error getting state of " + accessory.name))
     })
-
     stream.on("data", function (data: any) {
       var state = data.toString("utf-8").trim().toLowerCase()
       accessory.log("State of " + accessory.name + " is: " + state)
-      callback(null, accessory.matchesString(state))
+      callback(undefined, accessory.matchesString(state))
     })
   }
-
-  private readonly switchService: Service
-  private readonly informationService: Service
 
   constructor(log: Logging, config: AccessoryConfig, api: API) {
     this.log = log
     this.service = "Switch"
-
     this.name = config["name"]
     this.onCommand = config["on"]
     this.offCommand = config["off"]
@@ -137,70 +123,8 @@ class SshAccessory implements AccessoryPlugin {
       },
       config["ssh"]
     )
-
-    // this.switchService = new hap.Service.Switch(this.name)
-    // this.switchService
-    //   .getCharacteristic(hap.Characteristic.On)
-    //   .on(
-    //     CharacteristicEventTypes.GET,
-    //     (callback: CharacteristicGetCallback) => {
-    //       var accessory = this
-    //       var command = accessory["stateCommand"]
-
-    //       var stream = ssh(command, accessory.ssh)
-
-    //       stream.on("error", function (err: any) {
-    //         accessory.log("Error: " + err)
-    //         callback(
-    //           err || new Error("Error getting state of " + accessory.name)
-    //         )
-    //       })
-
-    //       stream.on("data", function (data: any) {
-    //         var state = data.toString("utf-8").trim().toLowerCase()
-    //         accessory.log("State of " + accessory.name + " is: " + state)
-    //         callback(null, accessory.matchesString(state))
-    //       })
-    //     }
-    //   )
-    //   .on(
-    //     CharacteristicEventTypes.SET,
-    //     (powerOn: CharacteristicValue, callback: CharacteristicSetCallback) => {
-    //       var accessory = this as any
-    //       var state = powerOn ? "on" : "off"
-    //       var prop = state + "Command"
-    //       var command = accessory[prop]
-
-    //       var stream = ssh(command, accessory.ssh)
-
-    //       stream.on("error", function (err: any) {
-    //         accessory.log("Error: " + err)
-    //         callback(
-    //           err ||
-    //             new Error("Error setting " + accessory.name + " to " + state)
-    //         )
-    //       })
-
-    //       stream.on("finish", function () {
-    //         accessory.log("Set " + accessory.name + " to " + state)
-    //         callback(null)
-    //       })
-    //     }
-    //   )
-
-    // this.informationService = new hap.Service.AccessoryInformation()
-    //   .setCharacteristic(hap.Characteristic.Manufacturer, "Custom Manufacturer")
-    //   .setCharacteristic(hap.Characteristic.Model, "Custom Model")
-
-    // log.info("Switch finished initializing!")
-
-    // var characteristic = this.switchService
-    //   .getCharacteristic(hap.Characteristic.On)
-    //   .on("set", this.setState.bind(this))
-
-    // if (this.stateCommand) {
-    //   characteristic.on("get", this.getState.bind(this))
-    // }
+    this.switchService = new hap.Service.Switch(this.name)
+    this.informationService = new hap.Service.AccessoryInformation()
   }
 
   /*
@@ -216,24 +140,16 @@ class SshAccessory implements AccessoryPlugin {
    * It should return all services which should be added to the accessory.
    */
   getServices(): Service[] {
-    // return [this.informationService, this.switchService]
-  var informationService = new hap.Service.AccessoryInformation()
-  var switchService = new hap.Service.Switch(this.name)
-
-  informationService
-    .setCharacteristic(hap.Characteristic.Manufacturer, "SSH Manufacturer")
-    .setCharacteristic(hap.Characteristic.Model, "SSH Model")
-    .setCharacteristic(hap.Characteristic.SerialNumber, "SSH Serial Number")
-
-  var characteristic = switchService
-    .getCharacteristic(hap.Characteristic.On)
-    .on("set", this.setState.bind(this))
-
-  if (this.stateCommand) {
-    characteristic.on("get", this.getState.bind(this))
-  }
-
-  return [switchService]
-
+    this.informationService
+      .setCharacteristic(hap.Characteristic.Manufacturer, "SSH Manufacturer")
+      .setCharacteristic(hap.Characteristic.Model, "SSH Model")
+      .setCharacteristic(hap.Characteristic.SerialNumber, "SSH Serial Number")
+    var characteristic = this.switchService
+      .getCharacteristic(hap.Characteristic.On)
+      .on("set", this.setState.bind(this))
+    if (this.stateCommand) {
+      characteristic.on("get", this.getState.bind(this))
+    }
+    return [this.informationService, this.switchService]
   }
 }
