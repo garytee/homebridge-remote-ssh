@@ -1,24 +1,44 @@
 {
   "name": "homebridge-remote-ssh",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "SSH plugin for homebridge: https://github.com/nfarina/homebridge",
+  "main": "dist/accessory.js",
   "license": "MIT",
   "keywords": [
     "homebridge-plugin"
   ],
-  "engines": {
-    "node": ">=0.12.0",
-    "homebridge": ">=0.2.0"
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
     "name": "Gary Tietjen"
   },
+  "engines": {
+    "homebridge": ">=1.0.0"
+  },
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/garytee/homebridge-remote-ssh.git"
   },
+  "bugs": {
+    "url": "http://github.com/garytee/homebridge-remote-ssh/issues"
+  },
   "dependencies": {
     "object-assign": "^4.1.1",
-    "remote-ssh-exec": "^1.0.0"
+    "remote-ssh-exec": "^1.0.0",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "10.17.19",
+    "homebridge": "^1.0.4",
+    "rimraf": "^3.0.2",
+    "typescript": "^3.8.3"
   }
 }
