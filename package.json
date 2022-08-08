@@ -1,6 +1,6 @@
 {
   "name": "homebridge-remote-ssh",
-  "version": "1.0.2",
+  "version": "1.0.1",
   "description": "SSH plugin for homebridge: https://github.com/nfarina/homebridge",
   "main": "dist/accessory.js",
   "license": "MIT",
