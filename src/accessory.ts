@@ -59,7 +59,7 @@ class SshAccessory implements AccessoryPlugin {
   private readonly switchService: Service
   private readonly informationService: Service
 
-  private matchesString(match: string): boolean {
+  matchesString(match: string): boolean {
     if (this.exactMatch) {
       return match === this.onValue
     } else {
@@ -67,15 +67,15 @@ class SshAccessory implements AccessoryPlugin {
     }
   }
 
-  private setState = (
+  setState = (
     powerOn: CharacteristicValue,
     callback: CharacteristicSetCallback
   ) => {
-    var accessory = this as any
-    var state = powerOn ? "on" : "off"
-    var prop = state + "Command"
-    var command = accessory[prop]
-    var stream = ssh(command, accessory.ssh)
+    let accessory = this as any
+    let state = powerOn ? "on" : "off"
+    let prop = state + "Command"
+    let command = accessory[prop]
+    let stream = ssh(command, accessory.ssh)
     stream.on("error", function (err: any) {
       accessory.log("Error: " + err)
       callback(
@@ -88,18 +88,32 @@ class SshAccessory implements AccessoryPlugin {
     })
   }
 
-  private getState = (callback: CharacteristicGetCallback) => {
-    var accessory = this
-    var command = accessory["stateCommand"]
-    var stream = ssh(command, accessory.ssh)
+
+  getState = (callback: CharacteristicGetCallback) => {
+    let accessory = this as any
+    let stream = ssh(accessory.stateCommand, accessory.ssh)
     stream.on("error", function (err: any) {
       accessory.log("Error: " + err)
-      callback(err || new Error("Error getting state of " + accessory.name))
-    })
-    stream.on("data", function (data: any) {
-      var state = data.toString("utf-8").trim().toLowerCase()
-      accessory.log("State of " + accessory.name + " is: " + state)
+      callback(
+        err || new Error("Error getting " + accessory.name + " state")
+      )
+    }).on("data", function (data: any) {
+      let match = data.toString().match(accessory.matchesString)
+      let state = data.toString("utf-8").trim().toLowerCase()
+
+      if (match) {
+        accessory.log("State of " + accessory.name + " is " + accessory.onValue)
+        callback(undefined, accessory.powerOn)
+      } else {
+        accessory.log("State of " + accessory.name + " is " + state)
       callback(undefined, accessory.matchesString(state))
+      }
+    }).on("finish", function () {
+      accessory.log("Finished getting " + accessory.name + " state")
+    }).on("close", function () {
+      accessory.log("Closed " + accessory.name + " state")
+    }).on("end", function () {
+      accessory.log("Ended " + accessory.name + " state")
     })
   }
 
@@ -143,7 +157,7 @@ class SshAccessory implements AccessoryPlugin {
       .setCharacteristic(hap.Characteristic.Manufacturer, "SSH Manufacturer")
       .setCharacteristic(hap.Characteristic.Model, "SSH Model")
       .setCharacteristic(hap.Characteristic.SerialNumber, "SSH Serial Number")
-    var characteristic = this.switchService
+    let characteristic = this.switchService
       .getCharacteristic(hap.Characteristic.On)
       .on(CharacteristicEventTypes.SET, this.setState.bind(this))
     if (this.stateCommand) {
